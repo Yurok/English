@@ -33,9 +33,10 @@ module.exports = function User (db, app)
 		{
 			return user.users_table(trx)
 			.insert({
-				firstName: data.first_name,
-				lastName: data.last_name,
-				email: null
+				firstName: data.username,
+				lastName: data.username,
+				email: data.username,
+				hashedPassword: user.encryptPassword(data.password)
 			}
 			, 'id')
 			.then(id => {return id})
@@ -45,7 +46,7 @@ module.exports = function User (db, app)
 	function isEmailExists (email, trx)
 	{
 		return user.byEmail(email, trx)
-			.then(Err.existent(EmailAlreadyExists))
+			.then( user => { if(user) throw Error ("user already exists") } )
 	}
 
 	user.remove = function (trx, ids)
@@ -57,7 +58,7 @@ module.exports = function User (db, app)
 			.whereIn('id', ids)
 			.del()
 
-	})
+	}
 
 	user.list = function (ids)
 	{
@@ -81,21 +82,21 @@ module.exports = function User (db, app)
 		return this.encryptPassword((password)) === user.hashedPassword;
 	};
 
-	user.autorize = function (email, password, callback) {
-
-		user.byEmail(email)
-			.then((userdata) => {
-				if(userdata) {
-					if(user.checkPassword(password, userdata)) {
-						return userdata;
-					} else {
-						throw new AuthError ('Password is incorrect')
-					}
-				} else {
-					return user.create(null, userdata)
-				}
-			})
-	}
+	// user.autorize = function (email, password) {
+    //
+	// 	user.byEmail(email)
+	// 		.then((userdata) => {
+	// 			if(userdata) {
+	// 				if(user.checkPassword(password, userdata)) {
+	// 					return userdata;
+	// 				} else {
+	// 					throw new AuthError ('Password is incorrect')
+	// 				}
+	// 			} else {
+	// 				return user.create(null, userdata)
+	// 			}
+	// 		})
+	// }
 
 	return user
 }
