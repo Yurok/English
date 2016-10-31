@@ -31,6 +31,9 @@ app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(passport.initialize());
+initPassport(passport, app.db.user);
+
 app.use('/', routes);
 app.use('/users', requireAuth, users(app.db.user));
 app.use('/auth', auth(app.db.user));
