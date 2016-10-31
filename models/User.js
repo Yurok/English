@@ -2,6 +2,7 @@ var crypto = require('crypto');
 var knexed = require('../libs/knexed')
 var AuthError = require('../err/authError').AuthError;
 
+
 module.exports = function User (db, app)
 {
 	var user = {}
@@ -28,18 +29,20 @@ module.exports = function User (db, app)
 
 	user.create = function (trx, data)
 	{
-		return isEmailExists (data.email, trx)
+		return isEmailExists (data.username, trx)
 		.then(() =>
 		{
+			var salt = gen_rand_str(16);
 			return user.users_table(trx)
-			.insert({
-				firstName: data.username,
-				lastName: data.username,
-				email: data.username,
-				hashedPassword: user.encryptPassword(data.password)
-			}
-			, 'id')
-			.then(id => {return id})
+				.insert(
+					{
+						email: data.username,
+						firstName: data.username,
+						lastName: data.username,
+						hashedPassword: user.encryptPassword(data.password, salt),
+						salt: salt
+					}, '*')
+			.then(users => {return users[0]})
 		})
 	}
 
@@ -47,6 +50,11 @@ module.exports = function User (db, app)
 	{
 		return user.byEmail(email, trx)
 			.then( user => { if(user) throw Error ("user already exists") } )
+	}
+
+	function gen_rand_str (length)
+	{
+		return crypto.randomBytes(length).toString('hex')
 	}
 
 	user.remove = function (trx, ids)
@@ -73,13 +81,13 @@ module.exports = function User (db, app)
 			.select('id', 'firstName', 'lastName', 'pic');
 	}
 
-	user.encryptPassword = function(password) {
-		return crypto.createHmac('sha1', this.salt).update(password).digest('hex');
+	user.encryptPassword = function(password, salt) {
+		return crypto.createHmac('sha1', salt).update(password).digest('hex');
 	};
 
 
 	user.checkPassword = function (password, user) {
-		return this.encryptPassword((password)) === user.hashedPassword;
+		return this.encryptPassword((password), user.salt) === user.hashedPassword;
 	};
 
 	// user.autorize = function (email, password) {

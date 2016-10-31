@@ -8,5 +8,6 @@
     "database": "english_vac",
     "user": "postgres",
     "password": "postgres"
-  }
+  },
+  "secret": "devdacticIsAwesome"
 }

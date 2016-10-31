@@ -4,7 +4,7 @@ function AuthError ( message) {
     Error.apply(this, arguments);
     Error.captureStackTrace(this, AuthError);
 
-    this.status = status;
+    //this.status = status;
     this.message = message;
 }
 

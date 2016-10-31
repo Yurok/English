@@ -1,15 +1,11 @@
 var express = require('express');
+
 var router = express.Router();
+var jwt = require('jsonwebtoken');
+var HttpError = require('../../err/httpError').HttpError;
+var config = require('../../config');
 
-// /* GET users listing. */
-// router.get('/', function(req, res, next) {
-//     res.send('respond with a resource');
-// });
-//
-// module.exports = router;
-
-/* GET users listing. */
-module.exports = function Users (user_model)
+module.exports = function Auth (user_model)
 {
     router.get('/', function(req, res, next) {
         var users = user_model.all()
@@ -59,12 +55,13 @@ module.exports = function Users (user_model)
                 if (user) {
                     throw new HttpError (401, "SigUp failed. Email already exists.")
                 } else {
-                    var userdata = {email: username, password: password}
+                    var userdata = {username: username, password: password}
                     return user_model.create(null, userdata);
                 }
             })
             .then(user => {
-                const token = jwt.sign(user, secret, {
+                var secret = config.get('secret');
+                var token = jwt.sign(user.id, secret, {
                     expiresIn: 10080 // in seconds
                 });
                 res.status(200).json({ success: true, token: 'JWT ' + token });
