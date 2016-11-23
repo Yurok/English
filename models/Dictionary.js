@@ -14,7 +14,7 @@ module.exports = function Dictionary (db)
 		return dictionary.dictionary_table(trx)
 			.select()
 			.where('dictionary.id', id)
-			.then((rows) => { return rows[0]})
+			.then((rows) => { return rows[0]} )
 	}
 
 	dictionary.byWord = function (english, russian, trx)
