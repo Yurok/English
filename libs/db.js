@@ -1,6 +1,7 @@
 var knex = require('knex')
 var config = require('../config');
 var User = require('../models/User')
+var Dictionary = require('../models/Dictionary')
 
 module.exports = function (app)
 {
@@ -14,6 +15,7 @@ module.exports = function (app)
     })
 
     db.user = User(db, app)
+    db.dictionary = Dictionary(db, app)
 
     return db
 }

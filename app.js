@@ -35,6 +35,7 @@ app.use(passport.initialize());
 initPassport(passport, app.db.user);
 
 app.use('/', routes);
+app.use('/dictionary', requireAuth, users(app.db.dictionary));
 app.use('/users', requireAuth, users(app.db.user));
 app.use('/auth', auth(app.db.user));
 
